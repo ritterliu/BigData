@@ -38,20 +38,36 @@ def parseFile():
     
   print '-----------FILE_content:', FILE_content
 
-
+#jank_total_sec, jank_max_sec, uptime_sec, jank_per_hour_sec, freemem_mb, total_mem_mb, count
 def main():
   parseFile()
   keys = []
+  values_jank_total_sec = []
+  values_jank_max_sec = []
+  values_uptime_sec = []
   values_jank_per_hour_sec = []
   values_freemem_mb = []
+  values_total_mem_mb = []
+  values_count = []
   sorted_keys = sorted(FILE_content)
   for key in sorted_keys:
     value = FILE_content[key]
+    values_jank_total_sec.append(value[0])
+    values_jank_max_sec.append(value[1])
+    values_uptime_sec.append(value[2])
     values_jank_per_hour_sec.append(value[3])
     values_freemem_mb.append(value[4])
-    print '%d:%d',(key,FILE_content[key][3])
+    values_total_mem_mb.append(value[5])
+    values_count.append(value[6])
 
-  drawScatter(sorted_keys, values_jank_per_hour_sec, values_freemem_mb)
+  drawScatter(sorted_keys,
+    values_jank_total_sec,
+    values_jank_max_sec,
+    values_uptime_sec,
+    values_jank_per_hour_sec,
+    values_freemem_mb,
+    values_total_mem_mb,
+    values_count)
 
 
 def formatVersion(ver):
@@ -87,16 +103,49 @@ def isVersionAllow(version):
   return True
 
 
-def drawScatter(version, values_jank_per_hour_sec, values_freemem_mb):
+def drawScatter(version,
+    values_jank_total_sec,
+    values_jank_max_sec,
+    values_uptime_sec,
+    values_jank_per_hour_sec,
+    values_freemem_mb,
+    values_total_mem_mb,
+    values_count):
     pyplot.xlabel('version')
-    pyplot.ylabel('values')
-    pyplot.title('MI6 jank report')
+    pyplot.ylabel('sec')
+    pyplot.title('MI6 jank jank total sec')
+    pyplot.scatter(version, values_jank_total_sec)
+    pyplot.show()
+
+    pyplot.ylabel('sec')
+    pyplot.title('MI6 jank jank max sec')
+    pyplot.scatter(version, values_jank_max_sec)
+    pyplot.show()
+
+    pyplot.ylabel('sec')
+    pyplot.title('MI6 jank uptime sec')
+    pyplot.scatter(version, values_uptime_sec)
+    pyplot.show()
+
+    pyplot.ylabel('s/H ')
+    pyplot.title('MI6 jank jank per hour sec')
     pyplot.scatter(version, values_jank_per_hour_sec)
     pyplot.show()
-    pyplot.scatter(version, values_freemem_mb)  
+
+    pyplot.ylabel('MB')
+    pyplot.title('MI6 jank freemem')
+    pyplot.scatter(version, values_freemem_mb)
     pyplot.show()
 
+    pyplot.ylabel('MB')
+    pyplot.title('MI6 jank total mem MB')
+    pyplot.scatter(version, values_total_mem_mb)
+    pyplot.show()
 
+    pyplot.ylabel('Count')
+    pyplot.title('MI6 log count')
+    pyplot.scatter(version, values_count)
+    pyplot.show()
 
 if __name__ == '__main__':
   print 'len(sys.argv)', len(sys.argv) 

@@ -9,7 +9,7 @@ FILE_NAME = ''
 
 LAUNCH_TIME_DICT= {}
 
-TOP_LAUNCH_COUNT_APP = [
+TOP_LAUNCH_COUNT_APP_OLD = [
 "com.android.settings/.SubSettings",
 "com.android.mms/.ui.SingleRecipientConversationActivity",
 "com.miui.securitycenter/com.miui.wakepath.ui.ConfirmStartActivity",
@@ -23,6 +23,21 @@ TOP_LAUNCH_COUNT_APP = [
 "com.eg.android.AlipayGphone/com.alipay.mobile.homefeeds.morecards.HomeMoreCardsActivity",
 "com.eg.android.AlipayGphone/com.alipay.mobile.nebulacore.ui.H5Activity"
 ]
+
+TOP_LAUNCH_COUNT_APP = [
+"com.android.quicksearchbox/.SearchActivity",
+"com.android.settings/.SubSettings",
+"com.android.systemui/.recents.RecentsActivity",
+"com.android.settings/.MainSettings",
+"com.android.camera/.Camera",
+"com.android.updater/.MainActivity",
+"com.tencent.mm/.plugin.sns.ui.En_424b8e16",
+"com.tencent.mm/.ui.LauncherUI",
+"com.android.incallui/.InCallActivity",
+"com.taobao.taobao/com.taobao.tao.homepage.MainActivity3"
+]
+
+MODLE_LIST = ['MI 6','MIX 2','MI 5','Redmi Note 4X']
 
 def parseFile():
   fileContent = open(FILE_NAME,'r').readlines()
@@ -92,45 +107,110 @@ def byteify(input):
 def drawByModel(model, launch_time_dict):
     version_list = []
     avg_launch_time_list = []
+    avg_launch_tim_count_list = []
     pic = 0
 
     sorted_version = sorted(launch_time_dict.keys())
-    # print 'sorted_version:', sorted_version 
+#    print '-----sorted_version:', sorted_version
 
     for app in TOP_LAUNCH_COUNT_APP:
         pic = pic + 1
-        for k, v in launch_time_dict.items():
+        for k in sorted_version:
             if k.startswith(model):
-                version = formatVersion(k.split(':')[1])
+                v = launch_time_dict[k]
                 if k not in version_list:
                     version_list.append(k)
 
                 #print 'len(v):', len(v)
                 if app in v.keys():
-                    #print 'ver:', k , ' v.has_key:', app
-                    avg_launch_time_list.append(calculateAVGLaunchTime(v[app], app))
+#                    print 'ver:', k , ' v.has_key:', app
+                    if len(v[app]) > 10:
+                        avg_launch_time_list.append(calculateAVGLaunchTime(v[app], app))
+                        avg_launch_tim_count_list.append(len(v[app]))
+                    else:
+                        avg_launch_time_list.append(0)
+                        # version_list.remove(k)
+                        avg_launch_tim_count_list.append(len(v[app]))
                 else:
-                    #print 'ver:', k , ' v.not has_key:', app
-                    avg_launch_time_list.append(-1)
+#                    print 'ver:', k , ' v.not has_key:', app
+                    avg_launch_time_list.append(0)
+                    # version_list.remove(k)
+                    avg_launch_tim_count_list.append(0)
 
-        #print 'version_list:', version_list
-        print 'APP:', app, '  avg_launch_time_list:', avg_launch_time_list
-        # ax = pyplot.subplots()
+#        print 'version_list:', version_list
+#        print 'APP:', app, '  avg_launch_time_list:', avg_launch_time_list
+
         pyplot.plot(version_list, avg_launch_time_list,
-            marker='o', label=app)
-        # pyplot.legend(loc='SouthOutside', bbox_to_anchor=(0.0,0.0),ncol=1,fancybox=True,shadow=True) 
-        pyplot.legend(loc='best', ncol=1) 
+            marker='o', label=app + ' ' + str(avg_launch_tim_count_list))
+
+        pyplot.legend(loc='best', ncol=1)
+        version_list = []
         avg_launch_time_list = []
+        avg_launch_tim_count_list = []
 
-#plt.plot(x, y, marker='o', mec='r', mfc='w',label=u'y=x^2')
-#plt.plot(x, y1, marker='*', ms=10,label=u'y=x^')
 
-        if pic%6 == 0 or pic == len(TOP_LAUNCH_COUNT_APP):
+        if pic%5 == 0 or pic == len(TOP_LAUNCH_COUNT_APP):
             pyplot.subplots_adjust(bottom=0.15)
             pyplot.xlabel('Version')
             pyplot.ylabel('ms')
             pyplot.title('Avg launch time')
+            # mng = pyplot.get_current_fig_manager()
+            # mng.full_screen_toggle()
+            manager = pyplot.get_current_fig_manager()
+            manager.resize(*manager.window.maxsize())
             pyplot.show()
+
+
+def drawByAPP(app, model_list, launch_time_dict):
+    sorted_version = sorted(launch_time_dict.keys())
+
+    version_list = []
+    avg_launch_time_list = []
+    avg_launch_tim_count_list = []
+    pic = 0
+
+    for model in model_list:
+        pic = pic + 1
+        for k in sorted_version:
+            if k.startswith(model):
+                v = launch_time_dict[k]
+                if k not in version_list:
+                    version_list.append(k.split(':')[1])
+
+                if app in v.keys():
+#                    print 'ver:', k , ' v.has_key:', app
+                    if len(v[app]) > 10:
+                        avg_launch_time_list.append(calculateAVGLaunchTime(v[app], app))
+                        avg_launch_tim_count_list.append(len(v[app]))
+                    else:
+                        avg_launch_time_list.append(0)
+                        # version_list.remove(k)
+                        avg_launch_tim_count_list.append(len(v[app]))
+                else:
+#                    print 'ver:', k , ' v.not has_key:', app
+                    avg_launch_time_list.append(0)
+                    # version_list.remove(k)
+                    avg_launch_tim_count_list.append(0)
+
+        pyplot.plot(version_list, avg_launch_time_list,
+            marker='o', label=model + ' ' + str(avg_launch_tim_count_list))
+
+        pyplot.legend(loc='best', ncol=1)
+        version_list = []
+        avg_launch_time_list = []
+        avg_launch_tim_count_list = []
+
+        if pic%5 == 0 or pic == len(TOP_LAUNCH_COUNT_APP):
+            pyplot.subplots_adjust(bottom=0.15)
+            pyplot.xlabel('Version')
+            pyplot.ylabel('ms')
+            pyplot.title('Avg launch time of <<< ' + app + ' >>>')
+            # mng = pyplot.get_current_fig_manager()
+            # mng.full_screen_toggle()
+            manager = pyplot.get_current_fig_manager()
+            manager.resize(*manager.window.maxsize())
+            pyplot.show()
+
 
 
 def formatVersion(ver):
@@ -161,17 +241,36 @@ def calculateAVGLaunchTime(launch_time_list, app):
 def draw():
   LAUNCH_TIME_DICT = readFile()
   print 'LAUNCH_TIME_DICT:', LAUNCH_TIME_DICT
-  drawByModel('MI 6', LAUNCH_TIME_DICT)
-  drawByModel('MIX 2', LAUNCH_TIME_DICT)
-  drawByModel('MI 5', LAUNCH_TIME_DICT)
-  drawByModel('MI 4 LTE', LAUNCH_TIME_DICT)
-  drawByModel('MI NOTE LTE', LAUNCH_TIME_DICT)
-  drawByModel('Redmi Note 4X', LAUNCH_TIME_DICT)  
+
+  for model in MODLE_LIST:
+    drawByModel(model, LAUNCH_TIME_DICT)
+
+  for app in TOP_LAUNCH_COUNT_APP:
+    drawByAPP(app, MODLE_LIST, LAUNCH_TIME_DICT)
+
+
+def getTopFrecAPPs():
+  LAUNCH_TIME_DICT = readFile()
+  top_frec_app = {}
+  for k in LAUNCH_TIME_DICT.keys():
+    model = k.split(':')[0]
+    print '--getTopFrecAPPs model:', model
+    if model in MODLE_LIST:
+        print '--getTopFrecAPPs in model:', model
+        v = LAUNCH_TIME_DICT[k]
+        for pkgs in v.keys():
+            if pkgs not in top_frec_app.keys():
+                top_frec_app[pkgs] = 1
+            else:
+                top_frec_app[pkgs] = top_frec_app[pkgs] + 1
+  print 'top_frec_app:', top_frec_app
+  print '---Sorted:', sorted(top_frec_app.items(), key=lambda d: d[1], reverse=False)
 
 
 def main():
-  parseFile()
-  # draw()
+  #parseFile()
+  draw()
+  #getTopFrecAPPs()
   
 
 
